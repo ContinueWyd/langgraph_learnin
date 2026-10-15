@@ -10,6 +10,34 @@ from langgraph.types import Command
 
 load_dotenv()
 
+
+'''                    START
+                      │
+                      ▼
+              ┌───────────────┐
+              │     agent     │
+              │               │
+              │  1. 调模型     │
+              │  2. 有         │
+              │  tool_calls?  │
+              └───────┬───────┘
+                      │
+          ┌───────────┴───────────┐
+          │                       │
+   Command(goto="tools")   Command(goto=END)
+   update={"messages":[response]}  update={"messages":[response]}
+          │                       │
+          ▼                       ▼
+    ┌──────────┐                 END
+    │  tools   │
+    │ ToolNode │
+    └────┬─────┘
+         │
+         │  回边
+         └──────────► 回到 agent
+'''
+
+
 @tool
 def get_weather(city: str) -> str:
     """查询指定城市的天气。"""
