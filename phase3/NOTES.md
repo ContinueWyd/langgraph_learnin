@@ -45,3 +45,28 @@
 - 调大 chunk_size 到 300
 - 加 min_chunk_size 过滤碎片
 - 加 Reranker 做二次排序
+
+
+## 3.3 检索优化：切分参数 + min_chunk_size + LLM rerank
+
+文件：step3_rerank.py
+
+三处改动：
+1. chunk_size 100 → 300，chunk_overlap 20 → 50
+2. separators 显式加中文标点：。！？；，
+3. min_chunk_size=30，过滤碎片
+4. 粗筛 k=10，LLM rerank 取 2
+
+查询：LangGraph 有什么特性？
+结果：
+  候选 0：讲特性、检查点、工具调用、多智能体协作
+  候选 1：讲持久化执行、人机协同、记忆、流式输出
+
+对比 3.2：
+- 上一轮结果 0 是 9 字符碎片，结果 1 几乎无关。
+- 这一轮两条都是语义相关的完整段落。
+- chunk_size 大让语义完整；中文分隔符让切点落在句子边界；min_chunk_size 过滤噪声。
+
+## 待优化
+- LLM rerank 慢、贵、不稳定，下一轮换 gte-rerank 专门模型
+- k=10 在当前小文档上没体现价值，真实项目才有效
