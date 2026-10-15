@@ -71,5 +71,30 @@
 | Overwrite(...) | 强制替换 | 需要中途重置上下文的场景 |
 
 
+## 1.7 MessagesState：内置的消息状态
+
+文件：messages_state.py
+输入：{"messages": [HumanMessage(content="用户输入")]}
+
+输出：
+
+    node_1 收到: [HumanMessage(content='用户输入', ...)]
+    node_2 收到: [HumanMessage(...), AIMessage(content='node_1 说的话', ...)]
+    最终结果:
+      HumanMessage -> 用户输入
+      AIMessage -> node_1 说的话
+      AIMessage -> node_2 说的话
+
+结论：MessagesState 等价于 messages: Annotated[list, add]，但消息是对象而非字符串。对象带 type（Human/AI/Tool）、id、tool_calls 等字段，tool_calls 是 Phase 2 工具调用的载体。
+
+## Phase 1 State 部分小结
+
+| 声明方式 | 行为 | 场景 |
+|---|---|---|
+| messages: list | 替换 | 只关心最新值 |
+| Annotated[list, add] | 追加 | 对话历史 |
+| MessagesState | 追加 + 消息对象 | 所有对话型 Agent |
+| Overwrite(...) | 强制替换 | 中途重置上下文 |
+
 ## 待验证
 
