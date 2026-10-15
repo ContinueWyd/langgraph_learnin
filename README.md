@@ -12,7 +12,7 @@ LangGraph 学习轨迹：从 StateGraph 到多 Agent 协作。
 - [x] Phase 2：Tool Calling
   - tool_calls 结构 / 手动闭环 / ToolNode / 条件边路由 / Command 路由
   - 结构化 Prompt 与标准内容块并入 Phase 3
-- [ ] Phase 3：RAG 全链路 + 上下文工程
+- [x] Phase 3：RAG 全链路 + 上下文工程
   - 文档加载 / 切分 / 向量化 / 向量库
   - 多路检索 / Reranker
   - 结构化 Prompt / 标准内容块（content_blocks）
@@ -44,3 +44,23 @@ LangGraph 学习轨迹：从 StateGraph 到多 Agent 协作。
 - Python 3.11
 - langgraph 1.2.15
 - langchain-core 1.6.10
+
+
+## 待补清单（留到项目阶段）
+
+以下内容已在学习中明确识别，但**暂不在此仓库实现**，留到后续项目仓库：
+
+### 检索优化
+- [ ] 混合检索（dense 向量 + BM25 关键词并行）
+- [ ] RRF（倒数排序融合）合并两路结果
+- [ ] 专用 Cross-Encoder Reranker（如 bge-reranker-v2-m3）替换 LLM rerank
+- [ ] 动态阈值截断（只保留分数达标的 Top 3-5）
+- [ ] 查询改写 / 多子查询分解
+
+### 上下文工程
+- [ ] 上下文压缩（对话历史 / 检索结果过长时的截断与摘要）
+- [ ] SummarizationMiddleware（LangChain v1 内置）
+
+### 触发时机
+- 项目阶段，当文档规模超过单篇小文档、检索质量可被量化评估时引入。
+- 每引入一项，需配套 eval harness（黄金集 + 指标）验证其贡献。
