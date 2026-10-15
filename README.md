@@ -5,7 +5,7 @@ LangGraph 学习轨迹：从 StateGraph 到多 Agent 协作。
 ## 进度
 
 - [x] 环境搭建：PyCharm + GitHub Desktop + .venv
-- [ ] Phase 1：StateGraph 骨架 + 上下文结构
+- [x] Phase 1：StateGraph 骨架 + 上下文结构
 - [ ] Phase 2：Tool Calling + 结构化 Prompt
 - [ ] Phase 3：RAG 全链路 + 上下文工程
 - [ ] Phase 4：Memory / HITL

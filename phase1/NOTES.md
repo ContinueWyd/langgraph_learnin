@@ -96,5 +96,37 @@
 | MessagesState | 追加 + 消息对象 | 所有对话型 Agent |
 | Overwrite(...) | 强制替换 | 中途重置上下文 |
 
-## 待验证
+
+## 1.8 条件边：运行时决定分支
+
+文件：conditional_edge.py
+
+图结构：
+
+    START → router → (route_decision)
+                        ├── "greet"    → greet    → END
+                        └── "farewell" → farewell → END
+
+输入1：{"messages": [HumanMessage(content="你好")]}
+输出1：最后一条 = "你好，我是 greet 分支"
+
+输入2：{"messages": [HumanMessage(content="拜拜")]}
+输出2：最后一条 = "再见，我是 farewell 分支"
+
+结论：
+- route_decision 不是节点，是挂在 router 后的判断函数，返回字符串决定走哪条边。
+- 条件边互斥，每次运行只走一条分支。
+- router_node 返回 {}，不修改 State，说明节点可以只做判断不做写操作。
+- 这是 Agent 的骨架：Phase 2 会把 if 判断换成模型输出。
+
+## Phase 1 完成清单
+
+- [x] 1.1 Annotated[list, add] 追加
+- [x] 1.2 无 reducer 替换
+- [x] 1.3 对比
+- [x] 1.4 返回 [] 无法清空
+- [x] 1.5 Overwrite 绕过 reducer
+- [x] 1.6 三种控制方式对比
+- [x] 1.7 MessagesState
+- [x] 1.8 条件边
 
