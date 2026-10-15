@@ -39,6 +39,39 @@
 - 模型不执行工具，只负责决策和生成最终回答。
 - 执行工具、拼 ToolMessage 是开发者（或框架）的责任。
 
+
+## 2.3 图里的 Tool Calling：ToolNode + 条件边 + 回边
+
+文件：graph_tool_call.py
+
+图结构：
+
+    START → agent → (should_continue)
+                      ├── 有 tool_calls → tools → agent（循环）
+                      └── 无 tool_calls → END
+
+输出：
+
+    agent_node 收到 1 条消息
+    [tool] get_weather(city=北京) -> 晴，25°C
+    agent_node 收到 3 条消息
+
+结论：
+- ToolNode 自动执行工具、生成 ToolMessage，替代手动循环。
+- should_continue 读最后一条消息的 tool_calls 字段决定路由。
+- tools → agent 是回边，形成循环；agent_node 被调用两次。
+- 循环终止条件由模型决定：不再返回 tool_calls 时走向 END。
+- 这是所有 ReAct 类 Agent 的骨架：决策节点 + 动作节点 + 回边。
+
+## 对比：手动版 vs 图版
+
+| 环节 | 手动版 | 图版 |
+|---|---|---|
+| 执行工具 | 手写 for 循环 | ToolNode |
+| 拼 ToolMessage | 手写 | ToolNode 自动 |
+| 路由 | if 判断 | 条件边 |
+| 循环 | 手动调两次 | 回边 |
+
 ## 待验证
 - LangGraph 的 ToolNode 如何自动完成第 2 步？
 - 图里如何根据 tool_calls 是否为空做路由？
