@@ -72,6 +72,39 @@
 | 路由 | if 判断 | 条件边 |
 | 循环 | 手动调两次 | 回边 |
 
+
+## 2.4 用 Command 重写 Agent 图
+
+文件：graph_tool_call_command.py
+
+图结构：
+
+    START → agent ──┬── Command(goto="tools") → tools → agent（回边）
+                    └── Command(goto=END)    → END
+
+输出：与 2.3 功能等价，循环次数、消息条数一致。
+
+结论：
+- Command 把“更新 State”和“决定路由”合并到一个返回值里。
+- 节点返回类型标注为 Command[Literal["tools", "__end__"]]。
+- 上一版的 should_continue 函数和 add_conditional_edges 被删除。
+- 两条分支都写 messages，只有 goto 不同。
+
+## 条件边 vs Command
+
+| 场景 | 选择 |
+|---|---|
+| 纯路由，不改 State | 条件边 |
+| 路由 + 更新 State | Command |
+| 跨图跳转（Phase 5） | Command(graph=Command.PARENT) |
+
+## Phase 2 完成清单
+
+- [x] 2.1 bind_tools 后模型返回 tool_calls
+- [x] 2.2 手动跑通完整闭环
+- [x] 2.3 图里的 Tool Calling（条件边版）
+- [x] 2.4 图里的 Tool Calling（Command 版）
+
 ## 待验证
 - LangGraph 的 ToolNode 如何自动完成第 2 步？
 - 图里如何根据 tool_calls 是否为空做路由？

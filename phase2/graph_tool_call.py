@@ -8,6 +8,24 @@ from langgraph.prebuilt import ToolNode
 
 load_dotenv()
 
+'''        START
+          │
+          ▼
+     ┌─────────┐
+     │  agent  │  ← llm_with_tools.invoke
+     └────┬────┘
+          │  ← should_continue
+    ┌─────┴─────┐
+    │有 tool_calls│   无 tool_calls
+    ▼            ▼
+┌────────┐      END
+│ tools  │  ← ToolNode
+└───┬────┘
+    │
+    └────────► 回到 agent（循环）
+
+'''
+
 @tool
 def get_weather(city: str) -> str:
     """查询指定城市的天气。"""
