@@ -105,3 +105,30 @@
 ## 待验证
 - interrupt 前的非幂等操作会导致重复执行（真实项目需注意）。
 - 多个 interrupt 串联的场景。
+
+## 4.5 Middleware：SummarizationMiddleware 上下文压缩
+
+文件：step5_middleware.py
+
+配置：
+- create_agent(model, tools=[], middleware=[summarizer], checkpointer=InMemorySaver())
+- SummarizationMiddleware(model=llm, trigger=("tokens", 100), keep=("messages", 2))
+- invoke 传 config={"configurable": {"thread_id": "summary-test-1"}}
+
+输出（trigger=100）：
+第 1 轮: 2 条
+第 2 轮: 4 条
+第 3-8 轮: 4 条（稳定，不再增长）
+
+对比 trigger=500：
+第 1-8 轮: 2,4,6,8,10,12,14,16 线性增长，摘要从未触发
+
+结论：
+- SummarizationMiddleware 在 token 超过 trigger 时，把旧消息摘要成一条，只保留最近 keep 条。
+- 摘要让上下文长度稳定，不再无限增长。
+- trigger 阈值决定摘要介入时机。太低会频繁摘要，太高则从不触发。
+- 摘要是有损的，细节会丢失。真实项目需用 eval 验证参数。
+
+## 待验证
+- 摘要的具体结构（保留几条原文 + 摘要条数）
+- 多个 Middleware 串联的场景（如 PII 脱敏 + 摘要）
