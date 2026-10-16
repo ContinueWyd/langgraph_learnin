@@ -23,3 +23,25 @@
 ## 待验证
 - 把 echo_node 换成真实模型调用，验证模型能否基于历史回答。
 - 长期记忆（store）跨 thread_id 的实现。
+
+
+## 4.2 模型 + Checkpointer：真正的记忆
+
+文件：step2_chat_with_memory.py
+
+输出：
+第一轮（user-1）: chat_node 收到 5 条 → "记住了，你叫小明"
+第二轮（user-1）: chat_node 收到 7 条 → "你叫小明"
+第三轮（user-2）: chat_node 收到 3 条 → "我不知道你的名字"
+
+结论：
+- 节点里把 state["messages"] 完整发给模型，模型就能基于历史回答。
+- checkpointer 只负责存取，理解由模型完成。两者结合才是真正的记忆。
+- 同一 thread_id 的历史跨脚本、跨运行累积（checkpoints.db 持久化）。
+- State 会无限累积，需要上下文压缩（留到项目阶段）。
+
+## 对比 4.1
+| 节点 | 第二轮回答 | 是否真正记得 |
+|---|---|---|
+| echo_node | "你说的是：我叫什么？" | 否 |
+| chat_node | "你叫小明。" | 是 |
