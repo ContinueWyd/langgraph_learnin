@@ -45,3 +45,38 @@
 |---|---|---|
 | echo_node | "你说的是：我叫什么？" | 否 |
 | chat_node | "你叫小明。" | 是 |
+
+
+
+## 4.3 长期记忆：Store 跨 thread_id 持久化
+
+文件：long_term_memory.py
+
+配置：
+- SqliteStore.from_conn_string("store.db")，独立于 checkpointer
+- g.compile(checkpointer=checkpointer, store=store)
+- invoke 的 context 参数传 user_id（注意：不是放在 config 里）
+
+输出：
+第一轮（thread_id=user-1, user_id=xiaoming）:
+  读到偏好 → 已存入偏好 → "好的，小明，我会继续用中文回答。"
+第二轮（thread_id=user-2, user_id=xiaoming）:
+  读到偏好 → "1+1等于2。"
+
+结论：
+- 换 thread_id 后，checkpointer 的历史不共享，但 store 的偏好共享。
+- namespace 按 ("preferences", user_id) 隔离，不同用户数据互不干扰。
+- context 参数必须作为 invoke 的独立参数传入，不能放在 config 里。
+- store.db 也是持久化的，跨脚本累积。
+
+## 两层记忆对比
+
+| | Checkpointer | Store |
+|---|---|---|
+| 隔离键 | thread_id | namespace |
+| 存什么 | 会话历史 | 用户长期数据 |
+| 第二轮能否看到 | 否（新 thread） | 是（同 user_id） |
+| 文件 | checkpoints.db | store.db |
+
+## 待验证
+- 用更明显的场景（如"用一句话介绍自己"）验证偏好真的影响输出。
