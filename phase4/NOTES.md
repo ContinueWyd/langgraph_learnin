@@ -80,3 +80,28 @@
 
 ## 待验证
 - 用更明显的场景（如"用一句话介绍自己"）验证偏好真的影响输出。
+
+
+
+## 4.4 Human-in-the-Loop：interrupt 暂停 + Command(resume) 恢复
+
+文件：step4_hitl.py
+
+第一次 invoke：
+  跑到 approval_node 的 interrupt() 暂停，step3 未执行。
+  返回里多出 __interrupt__ 字段，含 question、details、id。
+
+第二次 invoke（Command(resume="yes")）：
+  approval_node 被重新执行，interrupt 前的 print 又打印一次。
+  interrupt() 直接返回 "yes" 不暂停，图继续跑到 END。
+  最终 messages 4 条：Human + step1 + approval + step3。
+
+结论：
+- interrupt() 让图在节点内暂停，把控制权交回人类。
+- 恢复靠 Command(resume=...)，配合同一个 thread_id。
+- 被中断的节点恢复时会从头重新执行，interrupt 之前的代码必须幂等。
+- __interrupt__ 字段含中断信息，id 用于定位。
+
+## 待验证
+- interrupt 前的非幂等操作会导致重复执行（真实项目需注意）。
+- 多个 interrupt 串联的场景。
