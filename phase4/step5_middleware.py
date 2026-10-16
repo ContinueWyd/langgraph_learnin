@@ -29,11 +29,16 @@ agent = create_agent(
 
 print("===== 连续多轮对话，观察消息数变化 =====")
 config = {"configurable": {"thread_id": "summary-test-1"}}
+
+print("===== 连续多轮对话，观察消息数变化 =====")
 for i in range(1, 9):
-    result = agent.invoke({
-        "messages": [HumanMessage(content=f"这是第 {i} 轮对话，请简单回复。")]},
+    result = agent.invoke(
+        {"messages": [HumanMessage(content=f"这是第 {i} 轮对话，请简单回复。")]},
         config,
     )
     n = len(result["messages"])
-    print(f"第 {i} 轮 → 当前消息数: {n}")
-    print(f"  最后一条: {result['messages'][-1].content[:40]}...")
+    print(f"\n第 {i} 轮 → 当前消息数: {n}")
+    for j, m in enumerate(result["messages"]):
+        # 每条消息只打印前 60 字符，避免刷屏
+        content = m.content[:60].replace("\n", " ")
+        print(f"    [{j}] {type(m).__name__}: {content}")

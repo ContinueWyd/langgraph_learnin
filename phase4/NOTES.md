@@ -132,3 +132,33 @@
 ## 待验证
 - 摘要的具体结构（保留几条原文 + 摘要条数）
 - 多个 Middleware 串联的场景（如 PII 脱敏 + 摘要）
+
+## 4.5 Middleware：SummarizationMiddleware 上下文压缩
+
+文件：step5_middleware.py
+
+配置：
+- create_agent(model, tools=[], middleware=[summarizer], checkpointer=InMemorySaver())
+- SummarizationMiddleware(model=llm, trigger=("tokens", 100), keep=("messages", 2))
+- invoke 传 config={"configurable": {"thread_id": "summary-test-1"}}
+
+输出（trigger=100，8 轮）：
+第 1 轮: 2 条
+第 2 轮: 4 条，摘要出现
+第 3-8 轮: 4 条稳定
+
+第 3 轮的消息结构：
+  [0] HumanMessage: "Here is a summary of the conversation to date: ## SESSION I ..."
+  [1] AIMessage: 上一轮 AI 回复（keep 保留）
+  [2] HumanMessage: 本轮用户输入
+  [3] AIMessage: 本轮 AI 回复
+
+结论：
+- 摘要以 HumanMessage 形式出现，前缀 "Here is a summary of the conversation to date:"。
+- keep=("messages", 2) 保留最近 2 条，更早的被摘要替代。
+- 摘要每轮重新生成（把旧摘要 + 新压缩消息合成新摘要）。
+- 对比 trigger=500：从未触发，消息数线性增长到 16。
+
+## 待补
+- 摘要模板可自定义，默认是英文 "Here is a summary..."，中文场景应改。
+- 摘要和真实用户消息混在一起（都是 HumanMessage），可能需要 SystemMessage 区分。
