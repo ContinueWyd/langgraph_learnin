@@ -234,3 +234,36 @@
 ## 待验证
 - mask 策略的输出格式
 - block 策略在检测到 PII 时是否真的报错
+
+## 4.8 UntrackedValue：不持久化的 State 字段
+
+文件：step8_untracked.py
+
+导入：from langgraph.channels.untracked_value import UntrackedValue
+
+State:
+  messages: Annotated[list, add]
+  temp_cache: UntrackedValue[list]
+
+输出：
+第一次 invoke:
+  node_a 读到 []，写入后 node_b 读到 ['node_a 写入']
+第二次 invoke（同 thread_id）:
+  node_a 读到 []  ← 关键，恢复时清空
+  node_b 读到 ['node_a 写入']
+
+结论：
+- UntrackedValue 标记的字段不进 checkpoints.db，每次执行重置。
+- 节点内部可正常读写，只是不跨 invoke 持久化。
+- 适用场景：数据库连接、API 客户端、临时缓存。
+- 不加标记时，不可序列化的对象会让 checkpointer 序列化报错。
+
+## Phase 4 完成清单
+- [x] 4.1 Checkpointer：thread_id 会话隔离
+- [x] 4.2 模型 + Checkpointer：真正的记忆
+- [x] 4.3 Store：跨 thread 长期记忆
+- [x] 4.4 HITL：interrupt + Command(resume) 手写版
+- [x] 4.5 SummarizationMiddleware：上下文压缩
+- [x] 4.6 HumanInTheLoopMiddleware：声明式 HITL
+- [x] 4.7 PIIMiddleware：敏感信息脱敏
+- [x] 4.8 UntrackedValue：不持久化字段
