@@ -186,3 +186,27 @@
 - 恢复参数是结构化字典：{"decisions": [{"type": "approve"}]}，不是布尔值。
 - 四种决策类型：approve / edit / reject / respond。
 - 模型看到“敏感操作”可能不直接调工具（行为对齐），需要 system_prompt 强制它执行。
+
+
+## 4.7 PIIMiddleware：敏感信息脱敏
+
+文件：step7_pii_middleware.py
+
+配置：
+- PIIMiddleware("email", strategy="redact", apply_to_input=True)
+- PIIMiddleware("phone", detector=r"1[3-9]\d{9}", strategy="redact", apply_to_input=True)
+- 每个 PII 类型单独一个中间件实例，不是列表
+
+输出：
+第一次 invoke: 模型看到 [REDACTED_PHONE]，主动说"这是占位符"
+第二次 invoke: 从历史读到的也是 [REDACTED_PHONE]，答不出真实号码
+
+结论：
+- PIIMiddleware 在发给模型前替换敏感信息，模型看不到原始数据。
+- 脱敏后的版本写入 State（apply_to_input=True），后续轮次也看不到原始值。
+- 内置类型没有 phone_number，手机号需自定义 detector 正则。
+- strategy: redact（替换占位符）/ mask（部分遮盖）/ hash / block。
+
+## 待验证
+- mask 策略的输出格式
+- block 策略在检测到 PII 时是否真的报错
