@@ -162,3 +162,27 @@
 ## 待补
 - 摘要模板可自定义，默认是英文 "Here is a summary..."，中文场景应改。
 - 摘要和真实用户消息混在一起（都是 HumanMessage），可能需要 SystemMessage 区分。
+
+
+## 4.6 HumanInTheLoopMiddleware：声明式 HITL
+
+文件：step6_hitl_middleware.py
+
+配置：
+- HumanInTheLoopMiddleware(interrupt_on={"delete_data": True})
+- create_agent(model, tools, middleware=[hitl], checkpointer=InMemorySaver(), system_prompt=...)
+
+第一次 invoke：
+  __interrupt__ 含 action_requests 和 review_configs
+  review_configs[0].allowed_decisions = ['approve', 'edit', 'reject', 'respond']
+  消息数: 2（[tool] 未打印，工具没执行）
+
+第二次 invoke（Command(resume={"decisions": [{"type": "approve"}]})）：
+  [tool] delete_data 打印，工具执行
+  最终 4 条消息：Human → AI(tool_calls) → ToolMessage → AI(最终回答)
+
+结论：
+- 中间件声明式拦截：interrupt_on 字典指定哪些工具需要审批，不需要写自定义节点。
+- 恢复参数是结构化字典：{"decisions": [{"type": "approve"}]}，不是布尔值。
+- 四种决策类型：approve / edit / reject / respond。
+- 模型看到“敏感操作”可能不直接调工具（行为对齐），需要 system_prompt 强制它执行。
