@@ -17,7 +17,7 @@ LangGraph 学习轨迹：从 StateGraph 到多 Agent 协作。
   - 多路检索 / Reranker
   - 结构化 Prompt / 标准内容块（content_blocks）
   - 上下文压缩
-- [ ] Phase 4：Memory / HITL / Middleware
+- [x] Phase 4：Memory / HITL / Middleware
   - Checkpointer：短期记忆 / 长期记忆
   - Human-in-the-Loop：interrupt() + Command(resume=...)
   - Middleware：SummarizationMiddleware / HumanInTheLoopMiddleware / PIIMiddleware
