@@ -14,7 +14,6 @@ llm = ChatOpenAI(
 )
 
 # 1. 配置 PII 检测：检测手机号、邮箱
-from langchain.agents.middleware import PIIMiddleware
 
 # 邮箱：内置类型
 pii_email = PIIMiddleware("email", strategy="redact", apply_to_input=True)
@@ -27,12 +26,6 @@ pii_phone = PIIMiddleware(
     apply_to_input=True,
 )
 
-agent = create_agent(
-    model=llm,
-    tools=[],
-    middleware=[pii_email, pii_phone],
-    checkpointer=InMemorySaver(),
-)
 # 2. 加一个自定义工具，让模型可以主动查脱敏后的数据
 # （这一步可选，先跑纯对话看看脱敏效果）
 agent = create_agent(
