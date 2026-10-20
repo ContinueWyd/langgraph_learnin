@@ -81,3 +81,28 @@ tools = await client.get_tools()
 - [x] 5.1 Supervisor / Worker 模式
 - [x] 5.2 Handoff 模式
 - [x] 5.3 MCP 协议集成
+
+
+## 5.4 子图与跨图跳转：Command(graph=Command.PARENT)
+
+文件：step4_subgraph_command.py
+
+图结构：
+  父图：START → parent_node → subgraph(子图) → fallback_node → END
+  子图：START → child_node → END
+
+输出：
+测试 1（trigger=False）: 子图正常结束 → 走普通边 → fallback_node
+测试 2（trigger=True）: 子图直接 Command.PARENT 跳到父图 fallback_node
+
+结论：
+- Command(graph=Command.PARENT) 允许子图节点直接控制父图的流转。
+- 触发跨图跳转时，父图的普通边会被绕过。
+- 子图的 Literal 中如果不写父图节点，LangGraph 会把 goto 视为运行时解析，避免静态检查报错。
+- 注意：State 里的 messages 如果没有加 Annotated[list, add]，节点返回时会覆盖而非追加。
+
+## Phase 5 完成清单
+- [x] 5.1 Supervisor / Worker 模式
+- [x] 5.2 Handoff 模式
+- [x] 5.3 MCP 协议集成
+- [x] 5.4 Subgraph 与 Command.PARENT
