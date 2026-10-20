@@ -22,7 +22,7 @@ LangGraph 学习轨迹：从 StateGraph 到多 Agent 协作。
   - Human-in-the-Loop：interrupt() + Command(resume=...)
   - Middleware：SummarizationMiddleware / HumanInTheLoopMiddleware / PIIMiddleware
   - UntrackedValue：不被 checkpoint 的 State 字段
-- [ ] Phase 5：多 Agent + MCP
+- [x] Phase 5：多 Agent + MCP
   - Supervisor / Worker 模式
   - Handoff：Command(graph=Command.PARENT)
   - MCP：langchain.mcp（v1 规范，无状态）
