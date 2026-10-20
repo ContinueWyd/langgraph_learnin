@@ -47,3 +47,37 @@
 |---|---|---|---|
 | Supervisor | 星型 | 中心节点 | 复杂多任务分发 |
 | Handoff | 链型/网状 | 无中心 | 线性流程/客服流转 |
+
+
+
+## 5.3 MCP：工具与 Agent 解耦
+
+文件：
+- mcp_server.py（MCP Server，定义 add 和 greet 工具）
+- step3_mcp_client.py（MCP Client，动态发现并挂载工具）
+
+配置：
+MultiServerMCPClient({
+    "demo": {
+        "command": "python",
+        "args": ["mcp_server.py"],
+        "transport": "stdio"
+    }
+})
+tools = await client.get_tools()
+
+输出：
+发现工具: ['add', 'greet']
+测试 1: 42 + 58 = 100
+测试 2: 你好，小明！欢迎使用 MCP。
+
+结论：
+- MCP 把工具定义从 Agent 代码里抽离，通过标准协议通信（stdio）。
+- Agent 端零 @tool 定义，全靠 get_tools() 动态发现。
+- 底层通信日志：ListToolsRequest（问工具列表）、CallToolRequest（调工具）。
+- Agent 调用 MCP 工具必须用异步方法 ainvoke。
+
+## Phase 5 完成清单
+- [x] 5.1 Supervisor / Worker 模式
+- [x] 5.2 Handoff 模式
+- [x] 5.3 MCP 协议集成
