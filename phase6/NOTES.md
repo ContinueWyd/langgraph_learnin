@@ -59,3 +59,27 @@ Test 3: PASS
 - 简单的字符串包含判断能处理基础场景。
 - 真实生产环境会用 LLM-as-a-Judge（用大模型做语义匹配），或接入 LangSmith 的 Eval 模块。
 - 有了 Eval，修改 Prompt 或换模型后，才能量化评估“是否变好了”。
+
+
+## 6.4 服务化部署：FastAPI + Docker
+
+文件：main.py, Dockerfile, .dockerignore
+
+关键配置：
+1. FastAPI 将图封装为 POST /chat 接口，入参为 message 和 thread_id。
+2. Dockerfile 基于 python:3.11-slim，通过 uvicorn 启动服务。
+3. .dockerignore 排除了 .venv、*.db 等无用文件。
+4. 启动命令：docker run -d --name my-agent -p 8000:8000 --env-file .env langgraph-agent
+
+踩坑记录：
+- requirements.txt 中包含了 Windows 专属的 pywin32，导致 Linux 镜像构建失败，需手动剔除。
+- uvicorn 启动命令不能带 .py 后缀（应为 main:app）。
+- Windows 宿主机可能因为代理软件（Clash）导致无法访问本地映射的 8000 端口，可通过 localhost 或禁用代理解决。
+- PowerShell 打印中文可能乱码，但不影响接口实际返回的 UTF-8 内容。
+
+验证结果：
+进入容器内部发起 POST 请求，成功返回结构化 JSON：{"status": "success", "answer": "...", "thread_id": "..."}。
+
+结论：
+- Agent 的最终交付形态是 API 服务。
+- Docker 保证了环境隔离，让本地能跑的程序在任何服务器上都能跑。

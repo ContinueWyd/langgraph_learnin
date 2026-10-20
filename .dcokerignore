@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.git/
+.idea/
+checkpoints.db
+store.db
+hitl.db
+untracked.db
+chroma_db*/
