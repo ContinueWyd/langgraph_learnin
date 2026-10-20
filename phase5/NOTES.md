@@ -22,3 +22,28 @@
 
 ## 待优化
 - 用 with_structured_output 替代强 Prompt 约束，防止模型输出不合法导致中断。
+
+
+## 5.2 Handoff 模式：Agent 间直接移交控制权
+
+文件：step2_handoff.py
+
+图结构：
+  START → sales_agent ──┬── Command(goto="tech_agent") → tech_agent → END
+                        └── Command(goto=END) → END
+
+输出：
+测试 1: sales_agent 自己回答，未触发交接。
+测试 2: sales_agent 识别出技术问题，输出 HANDOFF_TECH，移交 tech_agent 处理。
+
+结论：
+- Handoff 是点对点交接，不需要中心 Supervisor 调度。
+- 适合链式流转（售前→售后→技术）。
+- 原 Agent 交接后直接“退休”，不再参与后续。
+- 交接时可选择是否写入一条“正在转接”的消息给用户。
+
+## Supervisor vs Handoff
+| 模式 | 拓扑 | 调度者 | 场景 |
+|---|---|---|---|
+| Supervisor | 星型 | 中心节点 | 复杂多任务分发 |
+| Handoff | 链型/网状 | 无中心 | 线性流程/客服流转 |
